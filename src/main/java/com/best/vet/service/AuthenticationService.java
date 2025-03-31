@@ -1,4 +1,4 @@
-package com.best.vet.sevice;
+package com.best.vet.service;
 
 import com.best.vet.entity.User;
 import com.best.vet.repository.UserRepository;
