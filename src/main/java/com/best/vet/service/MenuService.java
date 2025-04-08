@@ -1,8 +1,6 @@
 package com.best.vet.service;
 
-import com.best.vet.dto.CategoryDTO;
-import com.best.vet.dto.SubcategoryGroupDTO;
-import com.best.vet.dto.SubcategoryOptionDTO;
+import com.best.vet.dto.*;
 import com.best.vet.entity.Category;
 import com.best.vet.entity.SubcategoryOption;
 import com.best.vet.repository.CategoryRepository;
@@ -61,4 +59,13 @@ public class MenuService {
         }
         return categoryDTOs;
     }
+
+    public CategoryOptionDTO getCategoryAndSubcategoryOptionNamesBySubcategoryOptionId(Long id){
+        return subcategoryOptionRepository.findCategoryNameAndOptionValueById(id);
+    }
+
+    public SideBarInfoDTO getSideBarInfoBySubcategoryOptionId(Long id){
+        return subcategoryOptionRepository.findSideBarInfoById(id);
+    }
+
 }

@@ -34,11 +34,11 @@ public class AuthController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    @PostMapping("/register")
+    @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         User user = new User();
-        user.setName(request.getName());
-        user.setAge(request.getAge());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
         user.setGender(request.getGender());
         user.setAddress(request.getAddress());
         user.setUsername(request.getUsername());

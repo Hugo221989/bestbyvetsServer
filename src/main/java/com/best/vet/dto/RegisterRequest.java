@@ -7,8 +7,8 @@ import java.time.LocalDate;
 
 @Data
 public class RegisterRequest {
-    private String name;
-    private Integer age;
+    private String firstName;
+    private String lastName;
     private String gender;
     private String address;
     private String username;
