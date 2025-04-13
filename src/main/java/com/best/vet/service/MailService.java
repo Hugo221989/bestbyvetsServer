@@ -13,7 +13,7 @@ public class MailService {
     private JavaMailSender mailSender;
 
     public void sendActivationEmail(User user, String token) {
-        String activationUrl = "http://localhost:8080/api/activate?token=" + token; // update your domain accordingly
+        String activationUrl = "http://localhost:8081/activate?token=" + token; // update your domain accordingly
 
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(user.getEmail());

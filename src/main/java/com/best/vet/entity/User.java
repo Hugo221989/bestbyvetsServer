@@ -20,10 +20,11 @@ public class User {
     private String lastName;
     private String gender;
     private String address;
-    private String username;
     private String email;
     private String password;
     private Boolean lgpdAccepted;
+    @Column(name = "profile_image")
+    private String profileImage;
 
     private Boolean enabled = false;
     private LocalDate birthDate;

@@ -1,12 +1,17 @@
 package com.best.vet.controller;
+
+import com.best.vet.dto.AuthResponse;
 import com.best.vet.dto.LoginRequest;
 import com.best.vet.dto.RegisterRequest;
+import com.best.vet.dto.TokenRefreshRequest;
 import com.best.vet.entity.User;
 import com.best.vet.entity.VerificationToken;
+import com.best.vet.error.ApiError;
 import com.best.vet.repository.VerificationTokenRepository;
 import com.best.vet.service.AuthenticationService;
 import com.best.vet.service.MailService;
 import com.best.vet.service.UserService;
+import com.best.vet.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
     private UserService userService;
@@ -34,17 +39,34 @@ public class AuthController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/signup")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+
+        if (request == null || request.getEmail() == null || request.getEmail().isEmpty()) {
+            ApiError error = new ApiError(HttpStatus.BAD_REQUEST.value(), "Email is required.");
+            return ResponseEntity.badRequest().body(error);
+        }
+        if (request.getBirthDate() == null) {
+            ApiError error = new ApiError(HttpStatus.BAD_REQUEST.value(), "Birth date is required.");
+            return ResponseEntity.badRequest().body(error);
+        }
+        if (userService.emailExists(request.getEmail())) {
+            ApiError error = new ApiError(HttpStatus.CONFLICT.value(), "Email already exists.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
+
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setGender(request.getGender());
         user.setAddress(request.getAddress());
-        user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setEnabled(false);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setBirthDate(request.getBirthDate().toLocalDate());
         user.setLgpdAccepted(request.getLgpdAccepted());
         User savedUser = userService.registerUser(user);
 
@@ -84,13 +106,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            User user = authenticationService.login(request.getUsername(), request.getPassword());
-            // Remove sensitive info before returning (e.g., password)
-            user.setPassword(null);
-            return ResponseEntity.ok(user);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
+        AuthResponse response = authenticationService.authenticate(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody TokenRefreshRequest request) {
+        String newAccessToken = authenticationService.refreshAccessToken(request.getRefreshToken());
+        return ResponseEntity.ok(new AuthResponse(newAccessToken, request.getRefreshToken()));
     }
 }
