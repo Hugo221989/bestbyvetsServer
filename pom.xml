@@ -140,4 +140,16 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>prod</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<dependencies>
+				<!-- do not include devtools or override its inclusion -->
+			</dependencies>
+		</profile>
+	</profiles>
+
 </project>
