@@ -1,6 +1,8 @@
 package com.best.vet.controller;
 
+import com.best.vet.dto.AnalysisDTO;
 import com.best.vet.projection.ProductProjection;
+import com.best.vet.service.ProductAnalysisService;
 import com.best.vet.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,12 +21,8 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    private final WebClient webClient;
-
-    public ProductController(WebClient.Builder webClientBuilder) {
-        // You can use a standalone builder without enabling the full reactive stack.
-        this.webClient = webClientBuilder.baseUrl("https://world.openfoodfacts.org").build();
-    }
+    @Autowired
+    private ProductAnalysisService productAnalysisService;
 
     @GetMapping(value = "getBySubcategoryOptionValue/{value}")
     public ResponseEntity<List<ProductProjection>> getBySubcategoryOptionId(@PathVariable("value") Long value) {
@@ -44,15 +42,12 @@ public class ProductController {
     }
 
 
-    @GetMapping("/{barcode}")
-    public Mono<ResponseEntity<String>> getProductByBarcode(@PathVariable String barcode) {
-        return webClient.get()
-                .uri("/api/v0/product/{barcode}.json", barcode)
-                .retrieve()
-                .bodyToMono(String.class)
+    @GetMapping("/{barcode}/analysis")
+    public Mono<ResponseEntity<AnalysisDTO>> getProductByBarcode(@PathVariable String barcode) {
+        return productAnalysisService.analyzeByBarcode(barcode)
                 .map(ResponseEntity::ok)
-                .onErrorResume(ex ->
-                        Mono.just(ResponseEntity.badRequest().body("Error retrieving product data"))
+                .onErrorResume(e ->
+                        Mono.just(ResponseEntity.badRequest().build())
                 );
     }
 
